@@ -1,0 +1,57 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id       String   @id
+  email    String   @unique
+  password String
+  fullname String?
+  role     Role     @default(USER)
+  ticket   Ticket[]
+
+  @@map("account")
+}
+
+model Event {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String
+  location    String
+  startTime   DateTime
+  finishTime  DateTime
+  ticket      Ticket[]
+  poster      Poster[]
+
+  @@map("event")
+}
+
+model Ticket {
+  id        Int     @id
+  linkQr    String
+  accountId String
+  eventId   Int
+  account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  event     Event   @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@map("ticket")
+}
+
+model Poster {
+  id        Int    @id @default(autoincrement())
+  linkImage String
+  eventId   Int
+  event     Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@map("poster")
+}
+
+enum Role {
+  ADMIN
+  USER
+}
