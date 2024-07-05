@@ -7,7 +7,7 @@ class Storage {
     }
   }
 
-  async readFIle(file) {
+  async writeFIle(file) {
     const fileName = `${Date.now()}-${file.name}`;
     await Bun.write(`${this._folder}/${fileName}`, file);
 
