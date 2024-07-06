@@ -1,27 +1,26 @@
 import { Elysia } from "elysia";
-import { generateId } from "../../tools/generateId";
-import { postAccount, updateAccount } from "./handler";
-import { signInBodyDto, signUpBodyDto, updateAccountDto } from "./dto";
-import { passwordCompare, passwordHashing } from "../../tools/hash";
-import AuthenticationError from "../../exceptions/AuthenticationError";
 import { verifyAccount } from "../../auth/verifyAccount";
+import { prisma } from "../../db/prisma";
+import { hash } from "../../utils/hash";
+import { accountDto } from "./dto";
+import AuthenticationError from "../../exceptions/AuthenticationError";
 import AuthorizationError from "../../exceptions/AuthorizationError";
-import { checkAccount } from "./utils/checkAccount";
+import AccountHandler from "./handler";
+
+const accountHandler = new AccountHandler(prisma);
 
 export const accountController = new Elysia({ prefix: "/account" })
-  .decorate({ generateId, passwordHashing, passwordCompare })
   .post(
     "/signup",
-    async ({ body, generateId, passwordHashing, set }) => {
-      await checkAccount({
+    async ({ body, set }) => {
+      await accountHandler.checkAccount({
         exist: false,
         where: { email: body.email },
         select: { id: true },
       });
 
-      body.password = await passwordHashing(body.password);
-      await postAccount({ id: generateId(), body });
-
+      body.password = await hash.passwordHashing(body.password);
+      await accountHandler.postAccount({ id: generateId(), body });
       set.status = 201;
       return {
         status: "success",
@@ -29,20 +28,20 @@ export const accountController = new Elysia({ prefix: "/account" })
       };
     },
     {
-      body: signUpBodyDto,
+      body: accountDto.signUpBodyDto,
     }
   )
 
   .post(
     "/signin",
-    async ({ body, jwtTicket, passwordCompare }) => {
-      const account = await checkAccount({
+    async ({ body, jwtTicket }) => {
+      const account = await accountHandler.checkAccount({
         exist: true,
         where: { email: body.email },
         select: { id: true, password: true },
       });
 
-      const isMatch = await passwordCompare(body.password, account.password);
+      const isMatch = await hash.passwordCompare(body.password, account.password);
       if (!isMatch) {
         throw new AuthenticationError("Incorrect password");
       }
@@ -55,7 +54,7 @@ export const accountController = new Elysia({ prefix: "/account" })
       };
     },
     {
-      body: signInBodyDto,
+      body: accountDto.signInBodyDto,
     }
   )
 
