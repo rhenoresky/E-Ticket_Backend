@@ -1,15 +1,16 @@
 import { Elysia } from "elysia";
 import { prisma } from "../../db/prisma";
-import EventHandler from "./handler";
-import { verifyAccount } from "../../auth/verifyAccount";
 import { eventDto } from "./dto";
+import { verifyAccount } from "../../auth/verifyAccount";
+import EventHandler from "./handler";
 import AuthorizationError from "../../exceptions/AuthorizationError";
 
+const eventHandler = new EventHandler(prisma);
+
 export const eventController = new Elysia({ prefix: "/event" })
-  .decorate({ eventHandler: new EventHandler(prisma) })
   .post(
     "/",
-    async ({ body, eventHandler, set, request: { account } }) => {
+    async ({ body, set, request: { account } }) => {
       if (account.role !== "ADMIN") {
         throw new AuthorizationError("You are not an admin");
       }
@@ -29,7 +30,7 @@ export const eventController = new Elysia({ prefix: "/event" })
 
   .get(
     "/:id",
-    async ({ params: { id }, eventHandler }) => {
+    async ({ params: { id } }) => {
       const event = await eventHandler.getEvent(id);
 
       return {
@@ -44,7 +45,7 @@ export const eventController = new Elysia({ prefix: "/event" })
 
   .patch(
     "/:id",
-    async ({ params: { id }, body, eventHandler, request: { account } }) => {
+    async ({ params: { id }, body, request: { account } }) => {
       if (account.role !== "ADMIN") {
         throw new AuthorizationError("You are not an admin");
       }
@@ -64,7 +65,7 @@ export const eventController = new Elysia({ prefix: "/event" })
 
   .delete(
     "/:id",
-    async ({ params: { id }, eventHandler, request: { account } }) => {
+    async ({ params: { id }, request: { account } }) => {
       if (account.role !== "ADMIN") {
         throw new AuthorizationError("You are not an admin");
       }
@@ -83,13 +84,7 @@ export const eventController = new Elysia({ prefix: "/event" })
   )
   .post(
     "/:id/poster",
-    async ({
-      body,
-      set,
-      eventHandler,
-      params: { id },
-      request: { account },
-    }) => {
+    async ({ body, set, params: { id }, request: { account } }) => {
       if (account.role !== "ADMIN") {
         throw new AuthorizationError("You are not an admin");
       }
@@ -116,7 +111,7 @@ export const eventController = new Elysia({ prefix: "/event" })
   )
   .get(
     "/:id/poster",
-    async ({ eventHandler, params: { id } }) => {
+    async ({ params: { id } }) => {
       const poster = await eventHandler.getEventPosterById(id);
 
       return {
