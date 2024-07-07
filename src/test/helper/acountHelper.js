@@ -1,5 +1,5 @@
-import { prisma } from "../../../../db/prisma";
-import { passwordHashing } from "../../../../tools/hash";
+import { prisma } from "../../db/prisma";
+import { passwordHashing } from "../../utils/hash";
 
 const deleteAccountsHelper = async () => await prisma.account.deleteMany();
 const getAccountByEmailHelper = async (email = "user1@gmail.com") => {
