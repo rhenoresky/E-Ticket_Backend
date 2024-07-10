@@ -1,10 +1,10 @@
 import { afterEach, describe, expect, it } from "bun:test";
-import { app } from "../../..";
+import { app } from "../..";
 import {
   addAccountHelper,
   deleteAccountsHelper,
   getAccountByEmailHelper,
-} from "./helper/acountHelper";
+} from "../helper/acountHelper";
 
 describe("/account endpoint", () => {
   afterEach(async () => deleteAccountsHelper());
