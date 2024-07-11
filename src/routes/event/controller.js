@@ -4,8 +4,11 @@ import { eventDto } from "./dto";
 import { verifyAccount } from "../../auth/verifyAccount";
 import EventHandler from "./handler";
 import AuthorizationError from "../../exceptions/AuthorizationError";
+import FileStorage from "../../service/storage";
+import path from "node:path";
 
 const eventHandler = new EventHandler(prisma);
+const fileStorage = new FileStorage(path.resolve(__dirname, "../../public/images"));
 
 export const eventController = new Elysia({ prefix: "/event" })
   .post(
@@ -92,9 +95,7 @@ export const eventController = new Elysia({ prefix: "/event" })
       const event = await eventHandler.checkEventIsExist(id);
       if (!event) throw new NotFoundError("Event not found");
 
-      const fileName = `${Date.now()}-${body.file.name}`;
-      await Bun.write(process.env.PATH_IMG + fileName, body.file);
-      const url = `${process.env.HOST}/poster/${fileName}`;
+      const url = await fileStorage.writeFile(body.file);
 
       await eventHandler.addPoster(id, url);
       set.status = 201;
