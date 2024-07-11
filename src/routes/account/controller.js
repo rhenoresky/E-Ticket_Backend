@@ -60,15 +60,15 @@ export const accountController = new Elysia({ prefix: "/account" })
 
   .patch(
     "/:id",
-    async ({ request: { account }, params: { id }, body, passwordHashing }) => {
+    async ({ request: { account }, params: { id }, body }) => {
       if (account.role !== "ADMIN") {
         throw new AuthorizationError("You are not an admin");
       }
 
-      await checkAccount({ exist: true, where: { id }, select: { id: true } });
+      await accountHandler.checkAccount({ exist: true, where: { id }, select: { id: true } });
 
       if (body.email) {
-        await checkAccount({
+        await accountHandler.checkAccount({
           exist: false,
           where: { email: body.email },
           select: { id: true },
@@ -76,10 +76,10 @@ export const accountController = new Elysia({ prefix: "/account" })
       }
 
       if (body.password) {
-        body.password = await passwordHashing(body.password);
+        body.password = await hash.passwordHashing(body.password);
       }
 
-      await updateAccount({ id, body });
+      await accountHandler.updateAccount({ id, body });
 
       return {
         status: "success",
@@ -87,7 +87,7 @@ export const accountController = new Elysia({ prefix: "/account" })
       };
     },
     {
-      body: updateAccountDto,
+      body: accountDto.updateAccountDto,
       beforeHandle: verifyAccount,
     }
   );
