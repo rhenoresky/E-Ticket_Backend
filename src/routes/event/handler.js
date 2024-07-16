@@ -1,8 +1,6 @@
-import { prisma } from "../../db/prisma";
-
 class EventHandler {
   constructor(db) {
-    this._db = prisma;
+    this._db = db;
   }
 
   async postEvent(body) {
