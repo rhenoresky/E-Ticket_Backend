@@ -1,18 +1,21 @@
-class Storage {
-  constructor(folder) {
-    this._folder = folder;
+import { InternalServerError } from "elysia";
+import BaseStorage from "../../abstract/BaseStorage";
 
-    if (!fs.existsSync(folder)) {
-      fs.mkdirSync(folder, { recursive: true });
-    }
+class FileStorage extends BaseStorage {
+  constructor(path) {
+    super(path);
   }
 
-  async writeFIle(file) {
-    const fileName = `${Date.now()}-${file.name}`;
-    await Bun.write(`${this._folder}/${fileName}`, file);
-
-    return `${process.env.HOST}/poster/${fileName}`;
+  async writeFile(file) {
+    try {
+      const fileName = `${Date.now()}-${file.name}`;
+      await Bun.write(`${this._path}/${fileName}`, file);
+      return `${process.env.HOST}/poster/${fileName}`;
+    } catch (err) {
+      console.log(err);
+      throw new InternalServerError("Server Error");
+    }
   }
 }
 
-export default Storage;
+export default FileStorage;
