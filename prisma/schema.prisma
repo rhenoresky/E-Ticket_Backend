@@ -32,12 +32,14 @@ model Event {
 }
 
 model Ticket {
-  id        Int     @id
-  linkQr    String
-  accountId String
-  eventId   Int
-  account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  event     Event   @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  id          String        @id
+  ticketLink  String?
+  accountId   String
+  eventId     Int
+  status      StatusPayment @default(UNPAID)
+  paymentLink String
+  account     Account       @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  event       Event         @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
   @@map("ticket")
 }
@@ -54,4 +56,9 @@ model Poster {
 enum Role {
   ADMIN
   USER
+}
+
+enum StatusPayment {
+  PAID
+  UNPAID
 }
