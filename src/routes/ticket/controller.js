@@ -81,4 +81,33 @@ export const ticketController = new Elysia({ prefix: "/ticket" })
       beforeHandle: verifyAccount,
     }
   )
-  .post("/notification", async () => {});
+  .post("/notification", async ({ body }) => {
+    const res = await payment.notification(body);
+    const orderId = res.order_id;
+    const transactionStatus = res.transaction_status;
+    const fraudStatus = res.fraud_status;
+
+    console.log(
+      `Transaction notification received. Order ID: ${orderId}. Transaction status: ${transactionStatus}. Fraud status: ${fraudStatus}`
+    );
+
+    if (transactionStatus == "capture") {
+      if (fraudStatus == "accept") {
+        // TODO set transaction status on your database to 'success'
+        // and response with 200 OK
+      }
+    } else if (transactionStatus == "settlement") {
+      // TODO set transaction status on your database to 'success'
+      // and response with 200 OK
+    } else if (
+      transactionStatus == "cancel" ||
+      transactionStatus == "deny" ||
+      transactionStatus == "expire"
+    ) {
+      // TODO set transaction status on your database to 'failure'
+      // and response with 200 OK
+    } else if (transactionStatus == "pending") {
+      // TODO set transaction status on your database to 'pending' / waiting payment
+      // and response with 200 OK
+    }
+  });
