@@ -5,17 +5,15 @@ class PaymentMidtrans {
 
   async createTransaction(param) {
     try {
-      const transaction = await this._snap.createTransaction(param);
-      console.log(transaction);
+      return await this._snap.createTransaction(param);
     } catch (err) {
       console.log(err);
     }
   }
 
-  async notification(notifJson) {
+  async notification(notif) {
     try {
-      const transaction = await this._snap.transaction.notification(notifJson);
-      console.log(transaction);
+      return await this._snap.transaction.notification(notif);
     } catch (err) {
       console.log(err);
     }
