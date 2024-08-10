@@ -31,6 +31,18 @@ export const ticketDto = {
           country_code: t.String(),
         })
       ),
+      shipping_address: t.Optional(
+        t.Object({
+          first_name: t.String(),
+          last_name: t.String(),
+          email: t.String({format: "email"}),
+          phone: t.String(),
+          address: t.String(),
+          city: t.String(),
+          postal_code: t.String(),
+          country_code: t.String(),
+        })
+      )
     }),
   }),
 };
