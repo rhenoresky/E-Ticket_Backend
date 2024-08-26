@@ -8,18 +8,19 @@ datasource db {
 }
 
 model Account {
-  id       String   @id
-  email    String   @unique
-  password String
-  fullname String?
-  role     Role     @default(USER)
-  ticket   Ticket[]
+  id          String        @id
+  email       String        @unique
+  password    String
+  fullname    String?
+  role        Role          @default(USER)
+  ticket      Ticket[]
+  Transaction Transaction[]
 
   @@map("account")
 }
 
 model Event {
-  id          Int      @id @default(autoincrement())
+  id          Int           @id @default(autoincrement())
   name        String
   description String
   location    String
@@ -27,19 +28,19 @@ model Event {
   finishTime  DateTime
   ticket      Ticket[]
   poster      Poster[]
+  Transaction Transaction[]
 
   @@map("event")
 }
 
 model Ticket {
-  id          String        @id
-  ticketLink  String?
-  accountId   String
-  eventId     Int
-  status      StatusPayment @default(UNPAID)
-  paymentLink String
-  account     Account       @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  event       Event         @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  id         Int          @id @default(autoincrement())
+  ticketLink String
+  accountId  String
+  eventId    Int
+  status     StatusTicket @default(UNUSED)
+  account    Account      @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  event      Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
   @@map("ticket")
 }
@@ -53,12 +54,30 @@ model Poster {
   @@map("poster")
 }
 
+model Transaction {
+  id          String        @id
+  paymentLink String
+  status      StatusPayment @default(PENDING)
+  accountId   String
+  eventId     Int
+  account     Account       @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  event       Event         @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@map("transaction")
+}
+
 enum Role {
   ADMIN
   USER
 }
 
 enum StatusPayment {
-  PAID
-  UNPAID
+  SUCCESS
+  FAILED
+  PENDING
+}
+
+enum StatusTicket {
+  USED
+  UNUSED
 }
